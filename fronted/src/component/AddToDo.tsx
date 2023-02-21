@@ -1,41 +1,40 @@
-import {ChangeEvent, useEffect, useState} from "react";
-import {ToDo} from "../model/ToDo";
-import axios from "axios";
+import {ChangeEvent, useState} from "react";
+import {Todo} from "../model/Todo";
 
 
+type AddTodoProps = {
+    addTodo: (toDoToAdd: Todo) => void,
+}
 
-export default function InputUser(){
-    function addToDo(description:string) {
+export default function AddTodo(props: AddTodoProps){
 
-        axios.post('./api/todo', {
-                description:description,
-                status: 'OPEN'
-            }
-        )
-            .then(function (response) {
-                console.log(response);
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
+    const [todoToAdd, setToDoToAdd] = useState<Todo>({
+        id: "",
+        description: "",
+        status: "OPEN",
+    });
+
+    function handleChangeDescription(event: ChangeEvent<HTMLInputElement>){
+        setToDoToAdd({
+            ...todoToAdd,
+            description: event.target.value,
+        });
     }
 
-
-
-
-    const[description,setDescription]=useState("");
-
-    function handleInput(event:ChangeEvent<HTMLInputElement>){
-        setDescription(event.target.value)
+    function handleClickAddToDo(){
+        props.addTodo(todoToAdd);
+        setToDoToAdd({
+            ...todoToAdd,
+            description: "",
+        })
     }
-
 
     return(
         <div>
-            <input onChange={handleInput}/>
-            <button onClick={()=>addToDo(description)}>click</button>
+            Description: <input value={todoToAdd.description} onChange={handleChangeDescription} />
+            <button onClick={handleClickAddToDo}>Add ToDo</button>
         </div>
-
     );
-
 }
+
+

@@ -1,59 +1,76 @@
 import React, {useEffect, useState} from 'react';
 import './App.css';
 import "./component/AddToDo"
-import "./component/ToDoBoards"
+import "./component/TodoBoards"
 import InputUser from "./component/AddToDo";
 import "./component/Header"
 import Header from "./component/Header";
 import axios from "axios";
-import {ToDo} from "./model/ToDo";
-import ToDoBoards from "./component/ToDoBoards";
+import {Todo} from "./model/Todo";
+import TodoBoards from "./component/TodoBoards";
+import {Simulate} from "react-dom/test-utils";
+import error = Simulate.error;
+import AddTodo from "./component/AddToDo";
 
 function App() {
  // const [description,setDescription]=useState("");
-  const [toDos,setToDos]=useState<ToDo[]>([]);
+  const [todos,setToDos]=useState<Todo[]>([]);
 
-
-
-
- /* function handleDescription(){
-    setDescription(description)
-  }*/
-   function addNewToDo(newToDo: ToDo) {
-         setToDos(prevState => [...prevState, newToDo])
-   }
-   
-
-  function getAllToDos(){
+  function fetchTodos(){
     axios.get("./api/todo")
         .then((response) => {
           setToDos(response.data)
         })
-        .catch(error => {
+        .catch((error) => {
               console.error(error)
             }
         )
   }
-    useEffect(()=>{
-       getAllToDos()
-    },toDos)
 
-  // useEffect(()=>{
-  //     addNewToDo(toDo)
-  // },)
+  function deleteTodo(id:string){
+      axios.delete("./api/todo"+id)
+          .then(()=> {
+                  fetchTodos();
+              }
+          ).catch((error)=>
+          console.error((error))
+      )
+  }
+
+  function updateTodo(id:string,todo:Todo){
+      axios.put("./api/todo"+id+"/update"+todo)
+          .then(()=>{
+              fetchTodos();
+              }
+          ).catch((error)=>
+          console.error((error))
+      )
+  }
+
+    function addToDo(todoToAdd: Todo) {
+        axios.post("/api/todo", todoToAdd)
+            .then(() => {
+                fetchTodos();
+            })
+            .catch((error) => {
+                console.error("Something went wrong :(" + error)
+            });
+    }
+
+    useEffect(()=>{
+       fetchTodos()
+    },[])
+
 
   return (
     <div className="App">
       <Header/>
         <div>
-            <ToDoBoards toDoBoards={toDos}/>
+            <div className="App">
+                <AddTodo addTodo={addToDo}/>
+                <TodoBoards updateToDo={updateTodo} deleteTodo={deleteTodo} todos={todos}/>
+            </div>
         </div>
-        <div>
-          <footer>
-            <InputUser />
-          </footer>
-        </div>
-
 
     </div>
   );
